@@ -398,16 +398,17 @@
 
   QUnit.test('views stopListening', function(assert) {
     assert.expect(0);
+    var TestEmitter = function() {};
+    _.extend(TestEmitter.prototype, Backbone.Events);
     var View = Backbone.View.extend({
       initialize: function() {
         this.listenTo(this.model, 'all x', function(){ assert.ok(false); });
         this.listenTo(this.collection, 'all x', function(){ assert.ok(false); });
       }
     });
-
     var myView = new View({
-      model: new Backbone.Model,
-      collection: new Backbone.Collection
+      model: new TestEmitter,
+      collection: new TestEmitter
     });
 
     myView.stopListening();
