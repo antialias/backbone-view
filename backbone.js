@@ -36,6 +36,7 @@
   // form param named `model`.
   Backbone.emulateJSON = false;
 
+  var matches = Element.prototype.matches || Element.prototype.webkitMatchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.msMatchesSelector;
   // Backbone.Events
   // ---------------
 
@@ -316,6 +317,7 @@
   // if an existing element is not provided...
   var View = Backbone.View = function(options) {
     this.cid = _.uniqueId('view');
+    this.__delegatorConfigs = [];
     _.extend(this, _.pick(options, viewOptions));
     this._ensureElement();
     this.initialize.apply(this, arguments);
@@ -336,7 +338,10 @@
     // jQuery delegate for element lookup, scoped to DOM elements within the
     // current view. This should be preferred to global lookups where possible.
     $: function(selector) {
-      return this.$el.find(selector);
+      if (!this.el) {
+        return [];
+      }
+      return slice.call(this.el.querySelectorAll(selector));
     },
 
     // Initialize is an empty function by default. Override it with your own
@@ -362,7 +367,8 @@
     // attached to it. Exposed for subclasses using an alternative DOM
     // manipulation API.
     _removeElement: function() {
-      this.$el.remove();
+      this.undelegateEvents();
+      this.el.parentNode.removeChild(this.el);
     },
 
     // Change the view's element (`this.el` property) and re-delegate the
@@ -375,13 +381,16 @@
     },
 
     // Creates the `this.el` and `this.$el` references for this view using the
-    // given `el`. `el` can be a CSS selector or an HTML string, a jQuery
-    // context or an element. Subclasses can override this to utilize an
-    // alternative DOM manipulation API and are only required to set the
-    // `this.el` property.
+    // given `el`. `el` can be a CSS selector or an element. Subclasses can
+    // override this to utilize an alternative DOM manipulation API and are only
+    // required to set the `this.el` property.
     _setElement: function(el) {
-      this.$el = el instanceof Backbone.$ ? el : Backbone.$(el);
-      this.el = this.$el[0];
+      var querySelector;
+      if ('string' === typeof el) {
+        querySelector = el;
+        el = document.querySelector(querySelector);
+      }
+      this.el = el;
     },
 
     // Set callbacks, where `this.events` is a hash of
@@ -415,7 +424,23 @@
     // using `selector`). This only works for delegate-able events: not `focus`,
     // `blur`, and not `change`, `submit`, and `reset` in Internet Explorer.
     delegate: function(eventName, selector, listener) {
-      this.$el.on(eventName + '.delegateEvents' + this.cid, selector, listener);
+      var delegator;
+      if (!listener) {
+        listener = selector;
+        selector = null;
+      }
+      delegator = function(e) {
+        if (!selector || matches.call(e.target, selector)) {
+          return listener.apply(this, arguments);
+        }
+      };
+      this.__delegatorConfigs.push({
+        eventName: eventName,
+        selector: selector,
+        delegator: delegator,
+        listener: listener
+      });
+      this.el.addEventListener(eventName, delegator);
       return this;
     },
 
@@ -423,14 +448,33 @@
     // You usually don't need to use this, but may wish to if you have multiple
     // Backbone views attached to the same DOM element.
     undelegateEvents: function() {
-      if (this.$el) this.$el.off('.delegateEvents' + this.cid);
+      this.__delegatorConfigs.forEach(_.bind(function(delegatorConfig) {
+        this.el.removeEventListener(delegatorConfig.eventName, delegatorConfig.delegator);
+      }, this));
+      this.__delegatorConfigs = [];
       return this;
     },
 
     // A finer-grained `undelegateEvents` for removing a single delegated event.
     // `selector` and `listener` are both optional.
     undelegate: function(eventName, selector, listener) {
-      this.$el.off(eventName + '.delegateEvents' + this.cid, selector, listener);
+      var delegatorConfigs;
+      if ('string' !== typeof selector && !listener) {
+        listener = selector;
+        selector = null;
+      }
+      delegatorConfigs = this.__delegatorConfigs.filter(function(delegatorConfig) {
+        if (selector && selector !== delegatorConfig.selector) {
+          return false;
+        }
+        if (listener && listener !== delegatorConfig.listener) {
+          return false;
+        }
+        return eventName === delegatorConfig.eventName;
+      });
+      delegatorConfigs.forEach(function(delegatorConfig) {
+        this.el.removeEventListener(delegatorConfig.eventName, delegatorConfig.delegator);
+      }.bind(this));
       return this;
     },
 
@@ -459,7 +503,12 @@
     // Set attributes from a hash on this view's element.  Exposed for
     // subclasses using an alternative DOM manipulation API.
     _setAttributes: function(attributes) {
-      this.$el.attr(attributes);
+      if (!this.el) {
+        return;
+      }
+      _.each(attributes, function(value, name) {
+        this.el.setAttribute(name, value);
+      }, this);
     }
 
   });
