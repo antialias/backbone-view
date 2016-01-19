@@ -36,16 +36,6 @@ describe('Backbone.View', function() {
     assert.ok(result.length === +result.length);
   });
 
-  it('$el', function() {
-    assert.expect(3);
-    var myView = new Backbone.View;
-    myView.setElement('<p><a><b>test</b></a></p>');
-    assert.strictEqual(myView.el.nodeType, 1);
-
-    assert.ok(myView.$el instanceof Backbone.$);
-    assert.strictEqual(myView.$el[0], myView.el);
-  });
-
   it('initialize', function() {
     assert.expect(1);
     var View = Backbone.View.extend({
@@ -353,16 +343,6 @@ describe('Backbone.View', function() {
     $('body').trigger('fake$event');
   });
 
-  it('#1048 - setElement uses provided object.', function() {
-    assert.expect(2);
-    var $el = $('body');
-
-    var myView = new Backbone.View({el: $el});
-    assert.ok(myView.$el === $el);
-
-    myView.setElement($el = $($el));
-    assert.ok(myView.$el === $el);
-  });
 
   it('#986 - Undelegate before changing element.', function() {
     assert.expect(1);

@@ -602,10 +602,6 @@ describe('Events', function() {
     obj.trigger('event');
   });
 
-  it('Backbone object inherits Events', function() {
-    assert.ok(Backbone.on === Backbone.Events.on);
-  });
-
   it('once with asynchronous events', function(done) {
     assert.expect(1);
     var func = _.debounce(function() { assert.ok(true); done(); }, 50);
@@ -632,15 +628,6 @@ describe('Events', function() {
 
     obj.trigger('event');
     obj.trigger('event');
-  });
-
-  it('`once` on `all` should work as expected', function() {
-    assert.expect(1);
-    Backbone.once('all', function() {
-      assert.ok(true);
-      Backbone.trigger('all');
-    });
-    Backbone.trigger('all');
   });
 
   it('once without a callback is a noop', function() {
