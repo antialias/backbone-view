@@ -1,9 +1,9 @@
 {
-  "name"          : "backbone",
-  "description"   : "Give your JS App some Backbone with Models, Views, Collections, and Events.",
-  "url"           : "http://backbonejs.org",
+  "name"          : "simple-view",
+  "description"   : "Fork of Backbone.View (and Backbone.Events), ported to CommonJS with no jQuery",
   "keywords"      : ["model", "view", "controller", "router", "server", "client", "browser"],
-  "author"        : "Jeremy Ashkenas",
+  "author"        : "Thomas Hallock",
+  "contributors"  : ["Jeremy Ashkenas"],
   "dependencies"  : {
     "underscore"  : ">=1.8.3"
   },
@@ -24,10 +24,10 @@
   "license"       : "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jashkenas/backbone.git"
+    "url": "https://github.com/antialias/simple-view.git"
   },
   "files": [
-    "backbone.js", "backbone-min.js", "backbone-min.map", "LICENSE"
+    "backbone.js", "LICENSE"
   ]
 }
 
