@@ -10,8 +10,7 @@
   var root = global;
 
   // assume CommonJS
-  var _ = require('underscore'), $;
-  try { $ = require('jquery'); } catch (e) {}
+  var _ = require('underscore');
 
   var Backbone = module.exports = {};
 
@@ -20,10 +19,6 @@
 
   // Create a local reference to a common array method we'll want to use later.
   var slice = Array.prototype.slice;
-
-  // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
-  // the `$` variable.
-  Backbone.$ = $;
 
   // Turn on `emulateHTTP` to support legacy HTTP servers. Setting this option
   // will fake `"PATCH"`, `"PUT"` and `"DELETE"` requests via the `_method` parameter and
@@ -380,8 +375,8 @@
       return this;
     },
 
-    // Creates the `this.el` and `this.$el` references for this view using the
-    // given `el`. `el` can be a CSS selector or an element. Subclasses can
+    // Creates the `this.el` reference for this view using the
+    // given `el`. `el` can be an element. Subclasses can
     // override this to utilize an alternative DOM manipulation API and are only
     // required to set the `this.el` property.
     _setElement: function(el) {
@@ -485,9 +480,7 @@
     },
 
     // Ensure that the View has a DOM element to render into.
-    // If `this.el` is a string, pass it through `$()`, take the first
-    // matching element, and re-assign it to `el`. Otherwise, create
-    // an element from the `id`, `className` and `tagName` properties.
+    // Create an element from the `id`, `className` and `tagName` properties.
     _ensureElement: function() {
       if (!this.el) {
         var attrs = _.extend({}, _.result(this, 'attributes'));
