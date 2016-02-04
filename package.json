@@ -1,11 +1,21 @@
 {
-  "name"          : "simple-view",
-  "description"   : "Fork of Backbone.View (and Backbone.Events), ported to CommonJS with no jQuery",
-  "keywords"      : ["model", "view", "controller", "router", "server", "client", "browser"],
-  "author"        : "Thomas Hallock",
-  "contributors"  : ["Jeremy Ashkenas"],
-  "dependencies"  : {
-    "underscore"  : ">=1.8.3"
+  "name": "simple-view",
+  "description": "Fork of Backbone.View (and Backbone.Events), ported to CommonJS with no jQuery",
+  "keywords": [
+    "model",
+    "view",
+    "controller",
+    "router",
+    "server",
+    "client",
+    "browser"
+  ],
+  "author": "Thomas Hallock",
+  "contributors": [
+    "Jeremy Ashkenas"
+  ],
+  "dependencies": {
+    "underscore": ">=1.8.3"
   },
   "devDependencies": {
     "assert-expect": "^1.0.1",
@@ -19,15 +29,15 @@
     "build": "uglifyjs backbone.js --mangle --source-map backbone-min.map -o backbone-min.js",
     "lint": "eslint backbone.js test/*.js"
   },
-  "main"          : "backbone.js",
-  "version"       : "1.2.3",
-  "license"       : "MIT",
+  "main": "backbone.js",
+  "version": "1.2.4",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/antialias/simple-view.git"
   },
   "files": [
-    "backbone.js", "LICENSE"
+    "backbone.js",
+    "LICENSE"
   ]
 }
-
