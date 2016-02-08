@@ -356,6 +356,9 @@
     // manipulation API.
     _removeElement: function() {
       this.undelegateEvents();
+      if (!this.el.parentNode) {
+          return;
+      }
       this.el.parentNode.removeChild(this.el);
     },
 
