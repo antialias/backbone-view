@@ -357,7 +357,7 @@
     _removeElement: function() {
       this.undelegateEvents();
       if (!this.el.parentNode) {
-          return;
+        return;
       }
       this.el.parentNode.removeChild(this.el);
     },
