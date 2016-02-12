@@ -3,8 +3,17 @@
   var root = global;
 
   // assume CommonJS
-  var _ = require('underscore');
-
+  var create = require('lodash.create');
+  var isEmpty = require('lodash.isEmpty');
+  var uniqueId = require('lodash.uniqueid');
+  var size = require('lodash.size');
+  var once = require('lodash.once');
+  var assign = require('lodash.assign');
+  var pick = require('lodash.pick');
+  var result = require('lodash.result');
+  var isFunction = require('lodash.isfunction');
+  var forEach = require('lodash.foreach');
+  var has = require('lodash.has');
   var Backbone = module.exports = {};
 
   // Initial Setup
@@ -34,7 +43,7 @@
   // succession.
   //
   //     var object = {};
-  //     _.extend(object, Backbone.Events);
+  //     assign(object, Backbone.Events);
   //     object.on('expand', function(){ alert('expanded'); });
   //     object.trigger('expand');
   //
@@ -51,7 +60,7 @@
     if (name && typeof name === 'object') {
       // Handle event maps.
       if (callback !== void 0 && 'context' in opts && opts.context === void 0) opts.context = callback;
-      for (names = _.keys(name); i < names.length ; i++) {
+      for (names = Object.keys(name); i < names.length ; i++) {
         events = eventsApi(iteratee, events, names[i], name[names[i]], opts);
       }
     } else if (name && eventSplitter.test(name)) {
@@ -93,14 +102,14 @@
   // for easier unbinding later.
   Events.listenTo = function(obj, name, callback) {
     if (!obj) return this;
-    var id = obj._listenId || (obj._listenId = _.uniqueId('l'));
+    var id = obj._listenId || (obj._listenId = uniqueId('l'));
     var listeningTo = this._listeningTo || (this._listeningTo = {});
     var listening = listeningTo[id];
 
     // This object is not listening to any other events on `obj` yet.
     // Setup the necessary references to track the listening callbacks.
     if (!listening) {
-      var thisId = this._listenId || (this._listenId = _.uniqueId('l'));
+      var thisId = this._listenId || (this._listenId = uniqueId('l'));
       listening = listeningTo[id] = {obj: obj, objId: id, id: thisId, listeningTo: listeningTo, count: 0};
     }
 
@@ -140,7 +149,7 @@
     var listeningTo = this._listeningTo;
     if (!listeningTo) return this;
 
-    var ids = obj ? [obj._listenId] : _.keys(listeningTo);
+    var ids = obj ? [obj._listenId] : Object.keys(listeningTo);
 
     for (var i = 0; i < ids.length; i++) {
       var listening = listeningTo[ids[i]];
@@ -151,7 +160,7 @@
 
       listening.obj.off(name, callback, this);
     }
-    if (_.isEmpty(listeningTo)) this._listeningTo = void 0;
+    if (isEmpty(listeningTo)) this._listeningTo = void 0;
 
     return this;
   };
@@ -165,7 +174,7 @@
 
     // Delete all events listeners and "drop" events.
     if (!name && !callback && !context) {
-      var ids = _.keys(listeners);
+      var ids = listeners ? Object.keys(listeners) : [];
       for (; i < ids.length; i++) {
         listening = listeners[ids[i]];
         delete listeners[listening.id];
@@ -174,7 +183,7 @@
       return;
     }
 
-    var names = name ? [name] : _.keys(events);
+    var names = name ? [name] : Object.keys(events);
     for (; i < names.length; i++) {
       name = names[i];
       var handlers = events[name];
@@ -208,7 +217,7 @@
         delete events[name];
       }
     }
-    if (_.size(events)) return events;
+    if (size(events)) return events;
   };
 
   // Bind an event to only be triggered a single time. After the first time
@@ -217,14 +226,14 @@
   // once for each event, not once for a combination of all events.
   Events.once = function(name, callback, context) {
     // Map the event into a `{event: once}` object.
-    var events = eventsApi(onceMap, {}, name, callback, _.bind(this.off, this));
+    var events = eventsApi(onceMap, {}, name, callback, this.off.bind(this));
     return this.on(events, void 0, context);
   };
 
   // Inversion-of-control versions of `once`.
   Events.listenToOnce = function(obj, name, callback) {
     // Map the event into a `{event: once}` object.
-    var events = eventsApi(onceMap, {}, name, callback, _.bind(this.stopListening, this, obj));
+    var events = eventsApi(onceMap, {}, name, callback, this.stopListening.bind(this, obj));
     return this.listenTo(obj, events);
   };
 
@@ -232,11 +241,11 @@
   // `offer` unbinds the `onceWrapper` after it has been called.
   var onceMap = function(map, name, callback, offer) {
     if (callback) {
-      var once = map[name] = _.once(function() {
-        offer(name, once);
+      var callbackOnce = map[name] = once(function() {
+        offer(name, callbackOnce);
         callback.apply(this, arguments);
       });
-      once._callback = callback;
+      callbackOnce._callback = callback;
     }
     return map;
   };
@@ -288,7 +297,7 @@
 
   // Allow the `Backbone` object to serve as a global event bus, for folks who
   // want global "pubsub" in a convenient place.
-  _.extend(Backbone, Events);
+  assign(Backbone, Events);
 
   // Backbone.View
   // -------------
@@ -304,9 +313,9 @@
   // Creating a Backbone.View creates its initial element outside of the DOM,
   // if an existing element is not provided...
   var View = Backbone.View = function(options) {
-    this.cid = _.uniqueId('view');
+    this.cid = uniqueId('view');
     this.__delegatorConfigs = [];
-    _.extend(this, _.pick(options, viewOptions));
+    assign(this, pick(options, viewOptions));
     this._ensureElement();
     this.initialize.apply(this, arguments);
   };
@@ -318,7 +327,7 @@
   var viewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
 
   // Set up all inheritable **Backbone.View** properties and methods.
-  _.extend(View.prototype, Events, {
+  assign(View.prototype, Events, {
 
     // The default `tagName` of a View's element is `"div"`.
     tagName: 'div',
@@ -398,15 +407,15 @@
     // Uses event delegation for efficiency.
     // Omitting the selector binds the event to `this.el`.
     delegateEvents: function(events) {
-      events || (events = _.result(this, 'events'));
+      events || (events = result(this, 'events'));
       if (!events) return this;
       this.undelegateEvents();
       for (var key in events) {
         var method = events[key];
-        if (!_.isFunction(method)) method = this[method];
+        if (!isFunction(method)) method = this[method];
         if (!method) continue;
         var match = key.match(delegateEventSplitter);
-        this.delegate(match[1], match[2], _.bind(method, this));
+        this.delegate(match[1], match[2], method.bind(this));
       }
       return this;
     },
@@ -439,9 +448,9 @@
     // You usually don't need to use this, but may wish to if you have multiple
     // Backbone views attached to the same DOM element.
     undelegateEvents: function() {
-      this.__delegatorConfigs.forEach(_.bind(function(delegatorConfig) {
+      this.__delegatorConfigs.forEach(function(delegatorConfig) {
         this.el.removeEventListener(delegatorConfig.eventName, delegatorConfig.delegator);
-      }, this));
+      }.bind(this));
       this.__delegatorConfigs = [];
       return this;
     },
@@ -479,13 +488,13 @@
     // Create an element from the `id`, `className` and `tagName` properties.
     _ensureElement: function() {
       if (!this.el) {
-        var attrs = _.extend({}, _.result(this, 'attributes'));
-        if (this.id) attrs.id = _.result(this, 'id');
-        if (this.className) attrs['class'] = _.result(this, 'className');
-        this.setElement(this._createElement(_.result(this, 'tagName')));
+        var attrs = assign({}, result(this, 'attributes'));
+        if (this.id) attrs.id = result(this, 'id');
+        if (this.className) attrs['class'] = result(this, 'className');
+        this.setElement(this._createElement(result(this, 'tagName')));
         this._setAttributes(attrs);
       } else {
-        this.setElement(_.result(this, 'el'));
+        this.setElement(result(this, 'el'));
       }
     },
 
@@ -495,9 +504,9 @@
       if (!this.el) {
         return;
       }
-      _.each(attributes, function(value, name) {
+      forEach(attributes, function(value, name) {
         this.el.setAttribute(name, value);
-      }, this);
+      }.bind(this));
     }
 
   });
@@ -515,18 +524,18 @@
     // The constructor function for the new subclass is either defined by you
     // (the "constructor" property in your `extend` definition), or defaulted
     // by us to simply call the parent constructor.
-    if (protoProps && _.has(protoProps, 'constructor')) {
+    if (protoProps && has(protoProps, 'constructor')) {
       child = protoProps.constructor;
     } else {
       child = function(){ return parent.apply(this, arguments); };
     }
 
     // Add static properties to the constructor function, if supplied.
-    _.extend(child, parent, staticProps);
+    assign(child, parent, staticProps);
 
     // Set the prototype chain to inherit from `parent`, without calling
     // `parent`'s constructor function and add the prototype properties.
-    child.prototype = _.create(parent.prototype, protoProps);
+    child.prototype = create(parent.prototype, protoProps);
     child.prototype.constructor = child;
 
     // Set a convenience property in case the parent's prototype is needed
