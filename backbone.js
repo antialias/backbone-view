@@ -4,7 +4,7 @@
 
   // assume CommonJS
   var create = require('lodash.create');
-  var isEmpty = require('lodash.isEmpty');
+  var isEmpty = require('lodash.isempty');
   var uniqueId = require('lodash.uniqueid');
   var size = require('lodash.size');
   var once = require('lodash.once');
