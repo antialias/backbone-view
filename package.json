@@ -41,7 +41,7 @@
     "lint": "eslint backbone.js test/*.js"
   },
   "main": "backbone.js",
-  "version": "1.2.12",
+  "version": "1.2.13",
   "license": "MIT",
   "repository": {
     "type": "git",
