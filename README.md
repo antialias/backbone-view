@@ -1,4 +1,4 @@
-# backbone-view
+# simple-view
 Fork of Backbone.View (and Backbone.Events):
 * simplified to support only commonjs.
 * browser support requires a commonjs bundler (e.g. webpack or browserify)
@@ -10,12 +10,12 @@ Fork of Backbone.View (and Backbone.Events):
 
 ##installation:
 ```sh
-npm install --save backbone-view
+npm install --save simple-view
 ```
 
 ##usage:
 ```js
-const View = require('backbone-view').View;
+const View = require('simple-view').View;
 ```
 
 ##documentation
