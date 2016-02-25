@@ -1,5 +1,5 @@
+var assign = require('lodash.assign');
 var assert = require('assert-expect');
-var _ = require('underscore');
 var Backbone = require('../backbone');
 var CustomEvent = require('custom-event');
 
@@ -390,7 +390,7 @@ describe('Backbone.View', function() {
   it('views stopListening', function() {
     assert.expect(0);
     var TestEmitter = function() {};
-    _.extend(TestEmitter.prototype, Backbone.Events);
+    assign(TestEmitter.prototype, Backbone.Events);
     var View = Backbone.View.extend({
       initialize: function() {
         this.listenTo(this.model, 'all x', function(){ assert.ok(false); });

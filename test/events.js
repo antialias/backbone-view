@@ -1,4 +1,6 @@
-var _ = require('underscore');
+var debounce = require('lodash.debounce');
+var size = require('lodash.size');
+var assign = require('lodash.assign');
 var Backbone = require('../backbone');
 var assert = require('assert-expect');
 describe('Events', function() {
@@ -9,7 +11,7 @@ describe('Events', function() {
   it('on and trigger', function() {
     assert.expect(2);
     var obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     obj.on('event', function() { obj.counter += 1; });
     obj.trigger('event');
     assert.equal(obj.counter, 1, 'counter should be incremented.');
@@ -23,7 +25,7 @@ describe('Events', function() {
   it('binding and triggering multiple events', function() {
     assert.expect(4);
     var obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
 
     obj.on('a b c', function() { obj.counter += 1; });
 
@@ -43,7 +45,7 @@ describe('Events', function() {
 
   it('binding and triggering with event maps', function() {
     var obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
 
     var increment = function() {
       this.counter += 1;
@@ -74,7 +76,7 @@ describe('Events', function() {
 
   it('binding and triggering multiple event names with event maps', function() {
     var obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
 
     var increment = function() {
       this.counter += 1;
@@ -104,7 +106,7 @@ describe('Events', function() {
     assert.expect(2);
     var obj = {counter: 0};
     var context = {};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
 
     obj.on({
       a: function() {
@@ -121,8 +123,8 @@ describe('Events', function() {
 
   it('listenTo and stopListening', function() {
     assert.expect(1);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     a.listenTo(b, 'all', function(){ assert.ok(true); });
     b.trigger('anything');
     a.listenTo(b, 'all', function(){ assert.ok(false); });
@@ -132,8 +134,8 @@ describe('Events', function() {
 
   it('listenTo and stopListening with event maps', function() {
     assert.expect(4);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     var cb = function(){ assert.ok(true); };
     a.listenTo(b, {event: cb});
     b.trigger('event');
@@ -147,8 +149,8 @@ describe('Events', function() {
 
   it('stopListening with omitted args', function() {
     assert.expect(2);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     var cb = function() { assert.ok(true); };
     a.listenTo(b, 'event', cb);
     b.on('event', cb);
@@ -166,7 +168,7 @@ describe('Events', function() {
     assert.expect(2);
     // Same as the previous test, but we use once rather than having to explicitly unbind
     var obj = {counterA: 0, counterB: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     var incrA = function(){ obj.counterA += 1; obj.trigger('event'); };
     var incrB = function(){ obj.counterB += 1; };
     obj.listenToOnce(obj, 'event', incrA);
@@ -178,8 +180,8 @@ describe('Events', function() {
 
   it('listenToOnce and stopListening', function() {
     assert.expect(1);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     a.listenToOnce(b, 'all', function() { assert.ok(true); });
     b.trigger('anything');
     b.trigger('anything');
@@ -190,8 +192,8 @@ describe('Events', function() {
 
   it('listenTo, listenToOnce and stopListening', function() {
     assert.expect(1);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     a.listenToOnce(b, 'all', function() { assert.ok(true); });
     b.trigger('anything');
     b.trigger('anything');
@@ -202,8 +204,8 @@ describe('Events', function() {
 
   it('listenTo and stopListening with event maps', function() {
     assert.expect(1);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     a.listenTo(b, {change: function(){ assert.ok(true); }});
     b.trigger('change');
     a.listenTo(b, {change: function(){ assert.ok(false); }});
@@ -213,14 +215,14 @@ describe('Events', function() {
 
   it('listenTo yourself', function() {
     assert.expect(1);
-    var e = _.extend({}, Backbone.Events);
+    var e = assign({}, Backbone.Events);
     e.listenTo(e, 'foo', function(){ assert.ok(true); });
     e.trigger('foo');
   });
 
   it('listenTo yourself cleans yourself up with stopListening', function() {
     assert.expect(1);
-    var e = _.extend({}, Backbone.Events);
+    var e = assign({}, Backbone.Events);
     e.listenTo(e, 'foo', function(){ assert.ok(true); });
     e.trigger('foo');
     e.stopListening();
@@ -229,112 +231,112 @@ describe('Events', function() {
 
   it('stopListening cleans up references', function() {
     assert.expect(12);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     var fn = function() {};
     b.on('event', fn);
     a.listenTo(b, 'event', fn).stopListening();
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._events.event), 1);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._events.event), 1);
+    assert.equal(size(b._listeners), 0);
     a.listenTo(b, 'event', fn).stopListening(b);
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._events.event), 1);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._events.event), 1);
+    assert.equal(size(b._listeners), 0);
     a.listenTo(b, 'event', fn).stopListening(b, 'event');
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._events.event), 1);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._events.event), 1);
+    assert.equal(size(b._listeners), 0);
     a.listenTo(b, 'event', fn).stopListening(b, 'event', fn);
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._events.event), 1);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._events.event), 1);
+    assert.equal(size(b._listeners), 0);
   });
 
   it('stopListening cleans up references from listenToOnce', function() {
     assert.expect(12);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     var fn = function() {};
     b.on('event', fn);
     a.listenToOnce(b, 'event', fn).stopListening();
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._events.event), 1);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._events.event), 1);
+    assert.equal(size(b._listeners), 0);
     a.listenToOnce(b, 'event', fn).stopListening(b);
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._events.event), 1);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._events.event), 1);
+    assert.equal(size(b._listeners), 0);
     a.listenToOnce(b, 'event', fn).stopListening(b, 'event');
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._events.event), 1);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._events.event), 1);
+    assert.equal(size(b._listeners), 0);
     a.listenToOnce(b, 'event', fn).stopListening(b, 'event', fn);
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._events.event), 1);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._events.event), 1);
+    assert.equal(size(b._listeners), 0);
   });
 
   it('listenTo and off cleaning up references', function() {
     assert.expect(8);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     var fn = function() {};
     a.listenTo(b, 'event', fn);
     b.off();
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._listeners), 0);
     a.listenTo(b, 'event', fn);
     b.off('event');
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._listeners), 0);
     a.listenTo(b, 'event', fn);
     b.off(null, fn);
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._listeners), 0);
     a.listenTo(b, 'event', fn);
     b.off(null, null, a);
-    assert.equal(_.size(a._listeningTo), 0);
-    assert.equal(_.size(b._listeners), 0);
+    assert.equal(size(a._listeningTo), 0);
+    assert.equal(size(b._listeners), 0);
   });
 
   it('listenTo and stopListening cleaning up references', function() {
     assert.expect(2);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     a.listenTo(b, 'all', function(){ assert.ok(true); });
     b.trigger('anything');
     a.listenTo(b, 'other', function(){ assert.ok(false); });
     a.stopListening(b, 'other');
     a.stopListening(b, 'all');
-    assert.equal(_.size(a._listeningTo), 0);
+    assert.equal(size(a._listeningTo), 0);
   });
 
   it('listenToOnce without context cleans up references after the event has fired', function() {
     assert.expect(2);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     a.listenToOnce(b, 'all', function(){ assert.ok(true); });
     b.trigger('anything');
-    assert.equal(_.size(a._listeningTo), 0);
+    assert.equal(size(a._listeningTo), 0);
   });
 
   it('listenToOnce with event maps cleans up references', function() {
     assert.expect(2);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     a.listenToOnce(b, {
       one: function() { assert.ok(true); },
       two: function() { assert.ok(false); }
     });
     b.trigger('one');
-    assert.equal(_.size(a._listeningTo), 1);
+    assert.equal(size(a._listeningTo), 1);
   });
 
   it('listenToOnce with event maps binds the correct `this`', function() {
     assert.expect(1);
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = assign({}, Backbone.Events);
+    var b = assign({}, Backbone.Events);
     a.listenToOnce(b, {
       one: function() { assert.ok(this === a); },
       two: function() { assert.ok(false); }
@@ -344,7 +346,7 @@ describe('Events', function() {
 
   it("listenTo with empty callback doesn't throw an error", function() {
     assert.expect(1);
-    var e = _.extend({}, Backbone.Events);
+    var e = assign({}, Backbone.Events);
     e.listenTo(e, 'foo', null);
     e.trigger('foo');
     assert.ok(true);
@@ -353,7 +355,7 @@ describe('Events', function() {
   it('trigger all for each event', function() {
     assert.expect(3);
     var a, b, obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     obj.on('all', function(event) {
       obj.counter++;
       if (event === 'a') a = true;
@@ -368,7 +370,7 @@ describe('Events', function() {
   it('on, then unbind all functions', function() {
     assert.expect(1);
     var obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     var callback = function() { obj.counter += 1; };
     obj.on('event', callback);
     obj.trigger('event');
@@ -380,7 +382,7 @@ describe('Events', function() {
   it('bind two callbacks, unbind only one', function() {
     assert.expect(2);
     var obj = {counterA: 0, counterB: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     var callback = function() { obj.counterA += 1; };
     obj.on('event', callback);
     obj.on('event', function() { obj.counterB += 1; });
@@ -394,7 +396,7 @@ describe('Events', function() {
   it('unbind a callback in the midst of it firing', function() {
     assert.expect(1);
     var obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     var callback = function() {
       obj.counter += 1;
       obj.off('event', callback);
@@ -409,7 +411,7 @@ describe('Events', function() {
   it('two binds that unbind themeselves', function() {
     assert.expect(2);
     var obj = {counterA: 0, counterB: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     var incrA = function(){ obj.counterA += 1; obj.off('event', incrA); };
     var incrB = function(){ obj.counterB += 1; obj.off('event', incrB); };
     obj.on('event', incrA);
@@ -430,7 +432,7 @@ describe('Events', function() {
       assert.ok(true, '`this` was bound to the callback');
     };
 
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     obj.on('event', function() { this.assertTrue(); }, new TestClass);
     obj.trigger('event');
   });
@@ -438,7 +440,7 @@ describe('Events', function() {
   it('nested trigger with unbind', function() {
     assert.expect(1);
     var obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     var incr1 = function(){ obj.counter += 1; obj.off('event', incr1); obj.trigger('event'); };
     var incr2 = function(){ obj.counter += 1; };
     obj.on('event', incr1);
@@ -449,7 +451,7 @@ describe('Events', function() {
 
   it('callback list is not altered during trigger', function() {
     assert.expect(2);
-    var counter = 0, obj = _.extend({}, Backbone.Events);
+    var counter = 0, obj = assign({}, Backbone.Events);
     var incr = function(){ counter++; };
     var incrOn = function(){ obj.on('event all', incr); };
     var incrOff = function(){ obj.off('event all', incr); };
@@ -464,7 +466,7 @@ describe('Events', function() {
   it("#1282 - 'all' callback list is retrieved after each event.", function() {
     assert.expect(1);
     var counter = 0;
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     var incr = function(){ counter++; };
     obj.on('x', function() {
       obj.on('y', incr).on('all', incr);
@@ -475,12 +477,12 @@ describe('Events', function() {
 
   it('if no callback is provided, `on` is a noop', function() {
     assert.expect(0);
-    _.extend({}, Backbone.Events).on('test').trigger('test');
+    assign({}, Backbone.Events).on('test').trigger('test');
   });
 
   it('if callback is truthy but not a function, `on` should throw an error just like jQuery', function() {
     assert.expect(1);
-    var view = _.extend({}, Backbone.Events).on('test', 'noop');
+    var view = assign({}, Backbone.Events).on('test', 'noop');
     try {
       view.trigger('test');
     } catch (e) {
@@ -490,7 +492,7 @@ describe('Events', function() {
 
   it('remove all events for a specific context', function() {
     assert.expect(4);
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     obj.on('x y all', function() { assert.ok(true); });
     obj.on('x y all', function() { assert.ok(false); }, obj);
     obj.off(null, null, obj);
@@ -499,7 +501,7 @@ describe('Events', function() {
 
   it('remove all events for a specific callback', function() {
     assert.expect(4);
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     var success = function() { assert.ok(true); };
     var fail = function() { assert.ok(false); };
     obj.on('x y all', success);
@@ -510,7 +512,7 @@ describe('Events', function() {
 
   it('#1310 - off does not skip consecutive events', function() {
     assert.expect(0);
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     obj.on('event', function() { assert.ok(false); }, obj);
     obj.on('event', function() { assert.ok(false); }, obj);
     obj.off(null, null, obj);
@@ -521,7 +523,7 @@ describe('Events', function() {
     assert.expect(2);
     // Same as the previous test, but we use once rather than having to explicitly unbind
     var obj = {counterA: 0, counterB: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
     var incrA = function(){ obj.counterA += 1; obj.trigger('event'); };
     var incrB = function(){ obj.counterB += 1; };
     obj.once('event', incrA);
@@ -535,8 +537,8 @@ describe('Events', function() {
     assert.expect(3);
     var f = function(){ assert.ok(true); };
 
-    var a = _.extend({}, Backbone.Events).once('event', f);
-    var b = _.extend({}, Backbone.Events).on('event', f);
+    var a = assign({}, Backbone.Events).once('event', f);
+    var b = assign({}, Backbone.Events).on('event', f);
 
     a.trigger('event');
 
@@ -547,7 +549,7 @@ describe('Events', function() {
   it('once variant two', function() {
     assert.expect(3);
     var f = function(){ assert.ok(true); };
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
 
     obj
       .once('event', f)
@@ -559,7 +561,7 @@ describe('Events', function() {
   it('once with off', function() {
     assert.expect(0);
     var f = function(){ assert.ok(true); };
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
 
     obj.once('event', f);
     obj.off('event', f);
@@ -568,7 +570,7 @@ describe('Events', function() {
 
   it('once with event maps', function() {
     var obj = {counter: 0};
-    _.extend(obj, Backbone.Events);
+    assign(obj, Backbone.Events);
 
     var increment = function() {
       this.counter += 1;
@@ -596,7 +598,7 @@ describe('Events', function() {
   it('once with off only by context', function() {
     assert.expect(0);
     var context = {};
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     obj.once('event', function(){ assert.ok(false); }, context);
     obj.off(null, null, context);
     obj.trigger('event');
@@ -604,8 +606,8 @@ describe('Events', function() {
 
   it('once with asynchronous events', function(done) {
     assert.expect(1);
-    var func = _.debounce(function() { assert.ok(true); done(); }, 50);
-    var obj = _.extend({}, Backbone.Events).once('async', func);
+    var func = debounce(function() { assert.ok(true); done(); }, 50);
+    var obj = assign({}, Backbone.Events).once('async', func);
 
     obj.trigger('async');
     obj.trigger('async');
@@ -613,14 +615,14 @@ describe('Events', function() {
 
   it('once with multiple events.', function() {
     assert.expect(2);
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     obj.once('x y', function() { assert.ok(true); });
     obj.trigger('x y');
   });
 
   it('Off during iteration with once.', function() {
     assert.expect(2);
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     var f = function(){ this.off('event', f); };
     obj.on('event', f);
     obj.once('event', function(){});
@@ -632,18 +634,18 @@ describe('Events', function() {
 
   it('once without a callback is a noop', function() {
     assert.expect(0);
-    _.extend({}, Backbone.Events).once('event').trigger('event');
+    assign({}, Backbone.Events).once('event').trigger('event');
   });
 
   it('listenToOnce without a callback is a noop', function() {
     assert.expect(0);
-    var obj = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
     obj.listenToOnce(obj, 'event').trigger('event');
   });
 
   it('event functions are chainable', function() {
-    var obj = _.extend({}, Backbone.Events);
-    var obj2 = _.extend({}, Backbone.Events);
+    var obj = assign({}, Backbone.Events);
+    var obj2 = assign({}, Backbone.Events);
     var fn = function() {};
     assert.equal(obj, obj.trigger('noeventssetyet'));
     assert.equal(obj, obj.off('noeventssetyet'));
@@ -660,8 +662,8 @@ describe('Events', function() {
 
   it('#3448 - listenToOnce with space-separated events', function() {
     assert.expect(2);
-    var one = _.extend({}, Backbone.Events);
-    var two = _.extend({}, Backbone.Events);
+    var one = assign({}, Backbone.Events);
+    var two = assign({}, Backbone.Events);
     var count = 1;
     one.listenToOnce(two, 'x y', function(n) { assert.ok(n === count++); });
     two.trigger('x', 1);

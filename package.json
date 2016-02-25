@@ -17,6 +17,7 @@
   "dependencies": {
     "lodash.assign": "^4.0.2",
     "lodash.create": "^4.0.1",
+    "lodash.debounce": "^4.0.3",
     "lodash.foreach": "^4.0.0",
     "lodash.has": "^4.1.0",
     "lodash.isempty": "^4.1.1",
@@ -24,9 +25,8 @@
     "lodash.once": "^4.0.0",
     "lodash.pick": "^4.0.1",
     "lodash.result": "^4.1.0",
-    "lodash.size": "^4.0.2",
-    "lodash.uniqueid": "^3.2.0",
-    "underscore": ">=1.8.3"
+    "lodash.size": "^4.0.3",
+    "lodash.uniqueid": "^3.2.0"
   },
   "devDependencies": {
     "assert-expect": "^1.0.1",
