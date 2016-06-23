@@ -14,6 +14,7 @@
   var isFunction = require('lodash.isfunction');
   var forEach = require('lodash.foreach');
   var has = require('lodash.has');
+  var matches = require('matches-selector');
   var Backbone = module.exports = {};
 
   // Initial Setup
@@ -33,7 +34,6 @@
   // form param named `model`.
   Backbone.emulateJSON = false;
 
-  var matches = Element.prototype.matches || Element.prototype.webkitMatchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.msMatchesSelector;
   // Backbone.Events
   // ---------------
 
@@ -430,7 +430,7 @@
         selector = null;
       }
       delegator = function(e) {
-        if (!selector || matches.call(e.target, selector)) {
+        if (!selector || matches(e.target, selector)) {
           return listener.apply(this, arguments);
         }
       };
